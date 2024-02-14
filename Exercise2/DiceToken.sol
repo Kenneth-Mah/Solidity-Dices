@@ -22,7 +22,23 @@ contract DiceToken {
         erc20Contract.mint(msg.sender, amt);
     }
 
-    function checkCredit() public view returns(uint256) {
+    function checkCredit() public view returns (uint256) {
         return erc20Contract.balanceOf(msg.sender);
+    }
+
+    function transferCredit(address to, uint256 value) public {
+        erc20Contract.transfer(to, value);
+    }
+
+    function transferCreditFrom(address from, address to, uint256 value) public {
+        erc20Contract.transferFrom(from, to, value);
+    }
+
+    function approveCredit(address spender, uint256 value) public {
+        erc20Contract.approve(spender, value);
+    }
+
+    function allowanceCredit(address creditOwner, address spender) public view returns (uint256) {
+        return erc20Contract.allowance(creditOwner, spender);
     }
 }

@@ -129,10 +129,13 @@ contract ERC20 {
      * @param _value The amount of tokens to be spent.
      */
     function approve(address _spender, uint256 _value) public returns (bool) {
-        // Changed msg.send to tx.origin
-        // This will allow you to extend the DiceToken contract to allow approval for spending DTs while 
-        // still maintaining that it is the original caller of the function (and not the DiceToken contract) 
-        // that is providing the approval.
+        /**
+         * Changed msg.send to tx.origin
+         *
+         * This will allow you to extend the DiceToken contract to allow approval for spending DTs while
+         * still maintaining that it is the original caller of the function (and not the DiceToken contract)
+         * that is providing the approval.
+         */
         allowed[tx.origin][_spender] = _value;
         emit Approval(tx.origin, _spender, _value);
         return true;

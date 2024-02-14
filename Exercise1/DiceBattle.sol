@@ -21,7 +21,6 @@ contract DiceBattle {
     }
 
     function setBattlePair(address enemy) public {
-        // (Ignore) Require that only prev owner can allow an enemy
         // Each player can only select one enemy
         battle_pair[msg.sender] = enemy;
     }
