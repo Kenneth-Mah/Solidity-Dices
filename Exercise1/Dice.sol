@@ -60,24 +60,24 @@ contract Dice {
 
     //owner can roll a dice    
     function roll(uint256 diceId) public ownerOnly(diceId) validDiceId(diceId) {
-            dices[diceId].state = diceState.rolling;    //set state to rolling
-            dices[diceId].currentNumber = 0;    //number will become 0 while rolling
-            emit rolling(diceId);   //emit rolling event
+        dices[diceId].state = diceState.rolling;    //set state to rolling
+        dices[diceId].currentNumber = 0;    //number will become 0 while rolling
+        emit rolling(diceId);   //emit rolling event
     }
 
     function stopRoll(uint256 diceId) public ownerOnly(diceId) validDiceId(diceId) {
-            dices[diceId].state = diceState.stationary; //set state to stationary
-            
-            //this is not a secure randomization
-            uint8 newNumber = (uint8)((block.timestamp*(diceId+1)) % dices[diceId].numberOfSides) + 1;
-            dices[diceId].currentNumber = newNumber;
+        dices[diceId].state = diceState.stationary; //set state to stationary
+        
+        //this is not a secure randomization
+        uint8 newNumber = (uint8)((block.timestamp*(diceId+1)) % dices[diceId].numberOfSides) + 1;
+        dices[diceId].currentNumber = newNumber;
 
-            // LUCKY TIMES
-            if (newNumber == dices[diceId].numberOfSides) {
-                dices[diceId].luckyTimes = dices[diceId].luckyTimes + 1;
-                emit luckytimesEvent(diceId);
-            }
-            emit rolled(diceId, newNumber); //emit rolled
+        // LUCKY TIMES
+        if (newNumber == dices[diceId].numberOfSides) {
+            dices[diceId].luckyTimes = dices[diceId].luckyTimes + 1;
+            emit luckytimesEvent(diceId);
+        }
+        emit rolled(diceId, newNumber); //emit rolled
     }
     
     //transfer ownership to new owner

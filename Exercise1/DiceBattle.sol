@@ -12,6 +12,7 @@ import "./Dice.sol";
 
 
 contract DiceBattle {
+    
     Dice diceContract;
     mapping(address => address) battle_pair;
 
@@ -57,5 +58,9 @@ contract DiceBattle {
     //Add relevant getters and setters
     function getBattlePair(address myAddress) public view returns (address) {
         return battle_pair[myAddress];
+    }
+
+    function getMyBattlePair() public view returns (address) {
+        return battle_pair[msg.sender];
     }
 }
