@@ -3,7 +3,6 @@ pragma solidity ^0.5.0;
 import "./ERC20.sol";
 
 contract DiceToken {
-
     ERC20 erc20Contract;
     uint256 supplyLimit;
     uint256 currentSupply;
@@ -16,29 +15,32 @@ contract DiceToken {
         supplyLimit = 10000;
     }
 
+    event creditChecked(uint256 credit);
+
     function getCredit() public payable {
         uint256 amt = msg.value / 10000000000000000; // Get DTs eligible
         require(erc20Contract.totalSupply() + amt < supplyLimit, "DT supply is not enough");
+        // erc20Contract.transferFrom(owner, msg.sender, amt);
         erc20Contract.mint(msg.sender, amt);
+        
     }
 
-    function checkCredit() public view returns (uint256) {
-        return erc20Contract.balanceOf(msg.sender);
+    function checkCredit() public returns(uint256) {
+        uint256 credit = erc20Contract.balanceOf(msg.sender);
+        emit creditChecked(credit);
+        return credit;
     }
 
-    function transferCredit(address to, uint256 value) public {
-        erc20Contract.transfer(to, value);
+    function transferCredit(address receipt, uint256 amt) public {
+        erc20Contract.transfer(receipt, amt);
     }
 
-    function transferCreditFrom(address from, address to, uint256 value) public {
-        erc20Contract.transferFrom(from, to, value);
+    function transferCreditFrom(address from, address to, uint256 amt) public {
+        erc20Contract.transferFrom(from, to, amt);
     }
 
-    function approveCredit(address spender, uint256 value) public {
-        erc20Contract.approve(spender, value);
+    function giveAllowance(address receipt, uint256 amt) public {
+        erc20Contract.approve(receipt, amt);
     }
 
-    function allowanceCredit(address creditOwner, address spender) public view returns (uint256) {
-        return erc20Contract.allowance(creditOwner, spender);
-    }
 }

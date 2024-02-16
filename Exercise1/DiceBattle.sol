@@ -1,65 +1,51 @@
 pragma solidity ^0.5.0;
 import "./Dice.sol";
 
-/*
-1. First create dice using the Dice contract
-2. Transfer both die to this contract using the contract's address
-3. Use setBattlePair from each player's account to decide enemy
-4. Use the battle function to roll, stop rolling and then compare the numbers
-5. The player with the higher number gets BOTH dice
-6. If there is a tie, return the dice to their previous owner
-*/
-
-
 contract DiceBattle {
-    
     Dice diceContract;
     mapping(address => address) battle_pair;
 
     constructor(Dice diceAddress) public {
         diceContract = diceAddress;
     }
+    event add_enemy(address enemy);
+    event battlewin(uint256 id1, uint256 id2);
+    event battleDraw(uint256 id1, uint256 id2);
 
     function setBattlePair(address enemy) public {
-        // Each player can only select one enemy
         battle_pair[msg.sender] = enemy;
+        emit add_enemy(enemy);
     }
 
     function battle(uint256 myDice, uint256 enemyDice) public {
-        address myAddress = diceContract.getPrevOwner(myDice);
-        address enemyAddress = diceContract.getPrevOwner(enemyDice);
-
         // Require that battle_pairs align, ie each player has accepted a battle with the other
-        require((battle_pair[myAddress] == enemyAddress) && (battle_pair[enemyAddress] == myAddress));
+        address mine = diceContract.getPrevOwner(myDice);
+        address enemy = diceContract.getPrevOwner(enemyDice);
 
-        // Run battle
+        require(battle_pair[mine] == enemy, "Not valid pair!");
+        require(battle_pair[enemy] == mine, "Not valid pair!");
+
         diceContract.roll(myDice);
-        diceContract.roll(enemyDice);
-
         diceContract.stopRoll(myDice);
+        diceContract.roll(enemyDice);
         diceContract.stopRoll(enemyDice);
 
-        uint8 myDiceNumber = diceContract.getDiceNumber(myDice);
-        uint8 enemyDiceNumber = diceContract.getDiceNumber(enemyDice);
-
-        if (myDiceNumber > enemyDiceNumber) {
-            diceContract.transfer(myDice, myAddress);
-            diceContract.transfer(enemyDice, myAddress);
-        } else if (enemyDiceNumber > myDiceNumber) {
-            diceContract.transfer(myDice, enemyAddress);
-            diceContract.transfer(enemyDice, enemyAddress);
-        } else {
-            diceContract.transfer(myDice, myAddress);
-            diceContract.transfer(enemyDice, enemyAddress);
+        if ( diceContract.getDiceNumber(myDice) > diceContract.getDiceNumber(enemyDice) ) {
+            diceContract.transfer(myDice, diceContract.getPrevOwner(enemyDice)); //last owner before sending to DiceBattle
+            diceContract.transfer(enemyDice, diceContract.getPrevOwner(enemyDice));
+            emit battlewin(myDice,enemyDice);
         }
+        if ( diceContract.getDiceNumber(myDice) < diceContract.getDiceNumber(enemyDice) ) {
+            //ownership[enemyDice] = ownership[myDice];
+            //unlist(enemyDice);
+            diceContract.transfer(enemyDice,diceContract.getPrevOwner(myDice)); //last owner before sending to DiceBattle
+            diceContract.transfer(myDice,diceContract.getPrevOwner(myDice));
+            emit battlewin(enemyDice,myDice);
+        }
+        if ( diceContract.getDiceNumber(myDice) == diceContract.getDiceNumber(enemyDice) ) {
+            emit battleDraw(myDice,enemyDice);
+        }
+
     }
 
-    //Add relevant getters and setters
-    function getBattlePair(address myAddress) public view returns (address) {
-        return battle_pair[myAddress];
-    }
-
-    function getMyBattlePair() public view returns (address) {
-        return battle_pair[msg.sender];
-    }
 }
